@@ -1,6 +1,6 @@
 local UserConfig = {
     ["Red sword"] = {
-        Text = "Neptunian remaker",
+        Text = "Red sword remaker",
         TextColor = Color3.fromRGB(255, 215, 0),
         HighlightColor = Color3.fromRGB(255, 215, 0),
     },

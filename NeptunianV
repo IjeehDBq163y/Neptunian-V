@@ -6469,11 +6469,11 @@ task.spawn(function()
                 local th = child:FindFirstChild("TrueHandle")
                 if th then
                     trueHandle = th
-                    end
                     break
                 end
             end
         end
+        if not trueHandle then task.wait(0.5) end
     end
 
     _rs.Heartbeat:Connect(function()

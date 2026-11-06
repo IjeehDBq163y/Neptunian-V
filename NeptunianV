@@ -6429,10 +6429,6 @@ task.spawn(function()
     end)
 end)
 
--- hat sync2 --
-local hatOffset = CFrame.new(0, -8.5, 0.3) * CFrame.Angles(math.rad(180), math.rad(-5), math.rad(0))
-local targetMeshId = "99877750023550"
-
 task.spawn(function()
     local _player = game:GetService("Players").LocalPlayer
     local _char = _player.Character or _player.CharacterAdded:Wait()

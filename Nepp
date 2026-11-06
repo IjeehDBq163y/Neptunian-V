@@ -1,6 +1,6 @@
 local UserConfig = {
-    ["Red sword"] = {
-        Text = "Red sword remaker",
+    ["NEPTUNIAN V"] = {
+        Text = "NEPTUNIAN V",
         TextColor = Color3.fromRGB(255, 215, 0),
         HighlightColor = Color3.fromRGB(255, 215, 0),
     },
@@ -112,7 +112,7 @@ task.wait(1)
 
 local args = {
 	"cmd",
-	"-gh 18937978410"
+	"-gh 112934510372081"
 }
 game:GetService("ReplicatedStorage"):WaitForChild("01_server"):FireServer(unpack(args))
 wait(2)
@@ -6596,7 +6596,7 @@ ned.TextColor3 = BrickColor.new("Royal purple").Color
 ned.TextStrokeColor3 = BrickColor.new("Cyan").Color
 ned.TextScaled = true
 ned.TextStrokeTransparency = 0
-ned.Text = "Red sword Corrupted!"
+ned.Text = "NEPTUNIAN V"
 ned.TextSize = 24
 ned.Rotation = 1
 --ned.TextXAlignment = "Right"

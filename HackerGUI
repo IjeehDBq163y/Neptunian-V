@@ -1,0 +1,782 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+local me = Players.LocalPlayer
+
+local function safeCall(func, ...)
+    local success, err = pcall(func, ...)
+    if not success then warn("error: " .. tostring(err)) end
+end
+
+local hackerGui = Instance.new("ScreenGui")
+hackerGui.Name = "Hacker GUI"
+hackerGui.ResetOnSpawn = false
+hackerGui.Parent = me:WaitForChild("PlayerGui")
+
+local main = Instance.new("Frame", hackerGui)
+main.Size = UDim2.new(0, 350, 0, 600)
+main.Position = UDim2.new(0.3, 0, 0.3, 0)
+main.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+main.BorderColor3 = Color3.fromRGB(0, 0, 0)
+main.BorderSizePixel = 5
+main.Active = true
+main.Draggable = true
+
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+title.Text = "Hacker GUI"
+title.TextColor3 = Color3.fromRGB(0, 255, 0)
+title.TextSize = 25
+title.Font = Enum.Font.SourceSansBold
+
+local holder = Instance.new("Frame", main)
+holder.Size = UDim2.new(1, -20, 1, -80)
+holder.Position = UDim2.new(0, 10, 0, 50)
+holder.BackgroundTransparency = 1
+
+local footer = Instance.new("TextLabel", main)
+footer.Size = UDim2.new(1, 0, 0, 30)
+footer.Position = UDim2.new(0, 0, 1, -30)
+footer.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+footer.Text = "XXXXMade By Corrupted IjeehDBqXXXX"
+footer.TextColor3 = Color3.fromRGB(0, 255, 0)
+footer.TextSize = 18
+footer.Font = Enum.Font.SourceSansBold
+
+local function makeButton(name, func, x, y)
+    local btn = Instance.new("TextButton", holder)
+    btn.Size = UDim2.new(0, 100, 0, 30)
+    btn.Position = UDim2.new(0, x, 0, y)
+    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    btn.BorderColor3 = Color3.fromRGB(0, 255, 0)
+    btn.BorderSizePixel = 2
+    btn.TextColor3 = Color3.fromRGB(0, 255, 0)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 16
+    btn.Text = name
+    btn.MouseButton1Click:Connect(function() safeCall(func) end)
+end
+
+local bypassPart = Instance.new("Part")
+bypassPart.Name = "FEBypass"
+bypassPart.Size = Vector3.new(1, 1, 1)
+bypassPart.Transparency = 1
+bypassPart.CanCollide = false
+bypassPart.Anchored = true
+bypassPart.Parent = workspace
+
+local clickDetector = Instance.new("ClickDetector", bypassPart)
+clickDetector.MouseClick:Connect(function(player)
+    if player == me then end
+end)
+
+local function showHintToAll()
+    spawn(function()
+        while true do
+            local h = Instance.new("Hint", workspace)
+            h.Text = "😈the server got hacked by Corrupted IjeehDBq😈"
+            wait(2)
+            h:Destroy()
+            wait(1)
+        end
+    end)
+end
+
+local function hackAllParts()
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = humanoid.WalkSpeed * 0.5
+                wait(0.1)
+                humanoid.WalkSpeed = humanoid.WalkSpeed * 2
+            end
+        end
+    end
+    
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.BrickColor = BrickColor.new("Really black")
+            v.TopSurface = Enum.SurfaceType.Smooth
+            v.BottomSurface = Enum.SurfaceType.Smooth
+            
+            local s = Instance.new("SelectionBox", v)
+            s.Adornee = v
+            s.Color3 = Color3.new(1, 0, 0)
+            
+            local a = Instance.new("PointLight", v)
+            a.Color = Color3.new(1, 0, 0)
+            a.Range = 15
+            a.Brightness = 5
+            
+            local f = Instance.new("Fire", v)
+            f.Size = 19
+            f.Heat = 22
+        end
+    end
+end
+
+local function glitchMap()
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") then
+            spawn(function()
+                while true do
+                    v.Color = Color3.new(math.random(), math.random(), math.random())
+                    v.Material = Enum.Material.Neon
+                    wait(0.1)
+                end
+            end)
+        end
+    end
+end
+
+local function playMusic()
+    if not workspace:FindFirstChild("Music") then
+        local Music = Instance.new("Sound", workspace)
+        Music.Name = "Music 2006"
+        Music.SoundId = "rbxassetid://1839246711"
+        Music.Looped = true
+        Music.Volume = 10
+        Music:Play()
+    end
+end
+
+local function playMusic2()
+    if not workspace:FindFirstChild("Music2") then
+        local Music2 = Instance.new("Sound", workspace)
+        Music2.Name = "Music2"
+        Music2.SoundId = "rbxassetid://1839246774"
+        Music2.Looped = true
+        Music2.Volume = 10
+        Music2:Play()
+    end
+end
+
+local function playMusic3()
+    if not workspace:FindFirstChild("Music3") then
+        local Music3 = Instance.new("Sound", workspace)
+        Music3.Name = "Music3"
+        Music3.SoundId = "rbxassetid://1847661821"
+        Music3.Looped = true
+        Music3.Volume = 10
+        Music3:Play()
+    end
+end
+
+local function playSaxGuy()
+    if not workspace:FindFirstChild("EpicSaxGuy") then
+        local music = Instance.new("Sound", workspace)
+        music.Name = "EpicSaxGuy"
+        music.SoundId = "rbxassetid://135308045"
+        music.Looped = true
+        music.Volume = 10
+        music:Play()
+    end
+end
+
+local function firestorm()
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 0
+                wait(0.5)
+                humanoid.WalkSpeed = 16
+            end
+        end
+    end
+    
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") then
+            local f = Instance.new("Fire", v)
+            f.Size = 100
+            f.Heat = 500
+        end
+    end
+end
+
+-- GUARANTEED UNANCHOR: Everyone gets noclip and falls into the void
+local function unanchorMap()
+    -- 1. Unanchor ALL parts in workspace (map, walls, everything)
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.Anchored = false
+            v.CanCollide = false
+            v.Transparency = 1
+        end
+    end
+    
+    -- 2. Also unanchor the baseplate
+    local baseplate = workspace:FindFirstChild("Baseplate")
+    if baseplate then
+        baseplate.Anchored = false
+        baseplate.CanCollide = false
+        baseplate.Transparency = 1
+    end
+    
+    -- 3. Unanchor all character parts of EVERY player (noclip through everything)
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr.Character then
+            for _, part in pairs(plr.Character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end
+    
+    -- 4. Push EVERYONE down into the void with strong downward velocity
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                humanoid.JumpPower = 0
+                local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
+                if rootPart then
+                    rootPart.Velocity = Vector3.new(0, -500, 0)
+                    rootPart.AssemblyLinearVelocity = Vector3.new(0, -500, 0)
+                end
+            end
+        end
+    end
+    
+    -- 5. Continuous downward force loop so nobody can escape (keep falling)
+    spawn(function()
+        local startTime = tick()
+        while tick() - startTime < 15 do
+            for _, plr in pairs(Players:GetPlayers()) do
+                if plr.Character then
+                    local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
+                    if rootPart then
+                        rootPart.Velocity = Vector3.new(0, -500, 0)
+                        rootPart.AssemblyLinearVelocity = Vector3.new(0, -500, 0)
+                    end
+                end
+            end
+            wait(0.1)
+        end
+    end)
+    
+    -- 6. Explosions everywhere for visual effect (visible to everyone)
+    for i = 1, 30 do
+        local explosion = Instance.new("Explosion")
+        explosion.Position = Vector3.new(math.random(-100, 100), math.random(0, 100), math.random(-100, 100))
+        explosion.BlastRadius = 30
+        explosion.BlastPressure = 500000
+        explosion.DestroyJointRadiusPercent = 1
+        explosion.Parent = workspace
+        wait(0.05)
+    end
+end
+
+local function createDisconnectPopup(plr, errorCode)
+    local disconnectGui = Instance.new("ScreenGui")
+    disconnectGui.Name = "DisconnectPopup"
+    disconnectGui.ResetOnSpawn = false
+    disconnectGui.Parent = plr:WaitForChild("PlayerGui")
+    
+    local overlay = Instance.new("Frame", disconnectGui)
+    overlay.Size = UDim2.new(1, 0, 1, 0)
+    overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    overlay.BackgroundTransparency = 0.5
+    overlay.ZIndex = 10
+    
+    local frame = Instance.new("Frame", disconnectGui)
+    frame.Size = UDim2.new(0, 400, 0, 320)
+    frame.Position = UDim2.new(0.5, -200, 0.5, -160)
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    frame.BorderSizePixel = 0
+    frame.ZIndex = 11
+    
+    local corner = Instance.new("UICorner", frame)
+    corner.CornerRadius = UDim.new(0, 12)
+    
+    local stroke = Instance.new("UIStroke", frame)
+    stroke.Color = Color3.fromRGB(255, 50, 50)
+    stroke.Thickness = 3
+    stroke.Transparency = 0.2
+    
+    local logo = Instance.new("ImageLabel", frame)
+    logo.Size = UDim2.new(0, 110, 0, 35)
+    logo.Position = UDim2.new(0.5, -55, 0, 20)
+    logo.BackgroundTransparency = 1
+    logo.Image = "rbxassetid://128569219"
+    logo.ZIndex = 12
+    
+    local title = Instance.new("TextLabel", frame)
+    title.Size = UDim2.new(1, 0, 0, 45)
+    title.Position = UDim2.new(0, 0, 0, 65)
+    title.BackgroundTransparency = 1
+    title.Text = "Disconnected"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 28
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.ZIndex = 12
+    
+    local msg = Instance.new("TextLabel", frame)
+    msg.Size = UDim2.new(1, -40, 0, 80)
+    msg.Position = UDim2.new(0, 20, 0, 115)
+    msg.BackgroundTransparency = 1
+    msg.Text = "You have been disconnected from the game.\n\nError Code: " .. errorCode
+    msg.Font = Enum.Font.Gotham
+    msg.TextSize = 15
+    msg.TextColor3 = Color3.fromRGB(200, 200, 210)
+    msg.TextWrapped = true
+    msg.ZIndex = 12
+    
+    local date = Instance.new("TextLabel", frame)
+    date.Size = UDim2.new(1, 0, 0, 20)
+    date.Position = UDim2.new(0, 0, 0, 205)
+    date.BackgroundTransparency = 1
+    date.Text = os.date("%m/%d/%Y %H:%M:%S")
+    date.Font = Enum.Font.Code
+    date.TextSize = 12
+    date.TextColor3 = Color3.fromRGB(255, 255, 255)
+    date.ZIndex = 12
+    
+    local separator = Instance.new("Frame", frame)
+    separator.Size = UDim2.new(1, -40, 0, 1)
+    separator.Position = UDim2.new(0, 20, 0, 235)
+    separator.BackgroundColor3 = Color3.fromRGB(100, 100, 110)
+    separator.BorderSizePixel = 0
+    separator.ZIndex = 12
+    
+    local leaveBtn = Instance.new("TextButton", frame)
+    leaveBtn.Size = UDim2.new(0, 180, 0, 40)
+    leaveBtn.Position = UDim2.new(0.5, -90, 0, 250)
+    leaveBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
+    leaveBtn.BorderSizePixel = 0
+    leaveBtn.Text = "Leave"
+    leaveBtn.Font = Enum.Font.GothamBold
+    leaveBtn.TextSize = 17
+    leaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    leaveBtn.ZIndex = 12
+    
+    local btnCorner = Instance.new("UICorner", leaveBtn)
+    btnCorner.CornerRadius = UDim.new(0, 8)
+    
+    leaveBtn.MouseEnter:Connect(function()
+        TweenService:Create(leaveBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(100, 100, 110)}):Play()
+    end)
+    leaveBtn.MouseLeave:Connect(function()
+        TweenService:Create(leaveBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(70, 70, 80)}):Play()
+    end)
+    
+    leaveBtn.MouseButton1Click:Connect(function() game:Shutdown() end)
+    
+    if plr.Character then
+        spawn(function()
+            for i = 0, 1, 0.1 do
+                for _, part in pairs(plr.Character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.Transparency = i
+                    end
+                end
+                wait(0.2)
+            end
+        end)
+    end
+end
+
+local function createBanPopup(plr, errorCode)
+    local banGui = Instance.new("ScreenGui")
+    banGui.Name = "BanPopup"
+    banGui.ResetOnSpawn = false
+    banGui.Parent = plr:WaitForChild("PlayerGui")
+    
+    local overlay = Instance.new("Frame", banGui)
+    overlay.Size = UDim2.new(1, 0, 1, 0)
+    overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    overlay.BackgroundTransparency = 0.5
+    overlay.ZIndex = 10
+    
+    local frame = Instance.new("Frame", banGui)
+    frame.Size = UDim2.new(0, 400, 0, 340)
+    frame.Position = UDim2.new(0.5, -200, 0.5, -170)
+    frame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    frame.BorderSizePixel = 0
+    frame.ZIndex = 11
+    
+    local corner = Instance.new("UICorner", frame)
+    corner.CornerRadius = UDim.new(0, 12)
+    
+    local stroke = Instance.new("UIStroke", frame)
+    stroke.Color = Color3.fromRGB(255, 0, 0)
+    stroke.Thickness = 3
+    stroke.Transparency = 0.2
+    
+    local logo = Instance.new("ImageLabel", frame)
+    logo.Size = UDim2.new(0, 110, 0, 35)
+    logo.Position = UDim2.new(0.5, -55, 0, 20)
+    logo.BackgroundTransparency = 1
+    logo.Image = "rbxassetid://128569219"
+    logo.ZIndex = 12
+    
+    local title = Instance.new("TextLabel", frame)
+    title.Size = UDim2.new(1, 0, 0, 45)
+    title.Position = UDim2.new(0, 0, 0, 65)
+    title.BackgroundTransparency = 1
+    title.Text = "Kicked from Experience"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 26
+    title.TextColor3 = Color3.fromRGB(255, 50, 50)
+    title.ZIndex = 12
+    
+    local msg = Instance.new("TextLabel", frame)
+    msg.Size = UDim2.new(1, -40, 0, 80)
+    msg.Position = UDim2.new(0, 20, 0, 115)
+    msg.BackgroundTransparency = 1
+    msg.Text = "You have been kicked from this experience.\n\nError Code: " .. errorCode
+    msg.Font = Enum.Font.Gotham
+    msg.TextSize = 15
+    msg.TextColor3 = Color3.fromRGB(200, 200, 210)
+    msg.TextWrapped = true
+    msg.ZIndex = 12
+    
+    local banId = Instance.new("TextLabel", frame)
+    banId.Size = UDim2.new(1, 0, 0, 20)
+    banId.Position = UDim2.new(0, 0, 0, 205)
+    banId.BackgroundTransparency = 1
+    banId.Text = "Ban ID: " .. tostring(math.random(100000, 999999))
+    banId.Font = Enum.Font.Code
+    banId.TextSize = 12
+    banId.TextColor3 = Color3.fromRGB(255, 255, 255)
+    banId.ZIndex = 12
+    
+    local date = Instance.new("TextLabel", frame)
+    date.Size = UDim2.new(1, 0, 0, 20)
+    date.Position = UDim2.new(0, 0, 0, 230)
+    date.BackgroundTransparency = 1
+    date.Text = os.date("%m/%d/%Y %H:%M:%S")
+    date.Font = Enum.Font.Code
+    date.TextSize = 12
+    date.TextColor3 = Color3.fromRGB(255, 255, 255)
+    date.ZIndex = 12
+    
+    local separator = Instance.new("Frame", frame)
+    separator.Size = UDim2.new(1, -40, 0, 1)
+    separator.Position = UDim2.new(0, 20, 0, 260)
+    separator.BackgroundColor3 = Color3.fromRGB(100, 100, 110)
+    separator.BorderSizePixel = 0
+    separator.ZIndex = 12
+    
+    local leaveBtn = Instance.new("TextButton", frame)
+    leaveBtn.Size = UDim2.new(0, 180, 0, 40)
+    leaveBtn.Position = UDim2.new(0.5, -90, 0, 275)
+    leaveBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 80)
+    leaveBtn.BorderSizePixel = 0
+    leaveBtn.Text = "Leave"
+    leaveBtn.Font = Enum.Font.GothamBold
+    leaveBtn.TextSize = 17
+    leaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    leaveBtn.ZIndex = 12
+    
+    local btnCorner = Instance.new("UICorner", leaveBtn)
+    btnCorner.CornerRadius = UDim.new(0, 8)
+    
+    leaveBtn.MouseEnter:Connect(function()
+        TweenService:Create(leaveBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(100, 100, 110)}):Play()
+    end)
+    leaveBtn.MouseLeave:Connect(function()
+        TweenService:Create(leaveBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(70, 70, 80)}):Play()
+    end)
+    
+    leaveBtn.MouseButton1Click:Connect(function() game:Shutdown() end)
+    
+    if plr.Character then
+        spawn(function()
+            for i = 0, 1, 0.1 do
+                for _, part in pairs(plr.Character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.Transparency = i
+                    end
+                end
+                wait(0.2)
+            end
+        end)
+    end
+end
+
+local function shutdownServer()
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 0
+                humanoid.JumpPower = 0
+                for _, part in pairs(plr.Character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.Anchored = true
+                    end
+                end
+            end
+        end
+    end
+    
+    for i = 1, 10 do
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr.Character then
+                local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid.WalkSpeed = 0
+                    humanoid.JumpPower = 0
+                end
+            end
+        end
+        wait(0.1)
+    end
+    
+    for _, plr in pairs(Players:GetPlayers()) do
+        local blur = Instance.new("BlurEffect", Lighting)
+        blur.Name = "DisconnectBlur"
+        blur.Size = 50
+    end
+    
+    for _, plr in pairs(Players:GetPlayers()) do
+        createDisconnectPopup(plr, "1001")
+    end
+    
+    wait(5)
+    for _, plr in pairs(Players:GetPlayers()) do
+        plr:Kick("Disconnected: Error Code 1001")
+    end
+    game:Shutdown()
+end
+
+local function banAllPlayers()
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= me then
+            if plr.Character then
+                local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid.WalkSpeed = 0
+                    humanoid.JumpPower = 0
+                    for _, part in pairs(plr.Character:GetChildren()) do
+                        if part:IsA("BasePart") then
+                            part.Anchored = true
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    for i = 1, 10 do
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= me then
+                if plr.Character then
+                    local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        humanoid.WalkSpeed = 0
+                        humanoid.JumpPower = 0
+                    end
+                end
+            end
+        end
+        wait(0.1)
+    end
+    
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= me then
+            local blur = Instance.new("BlurEffect", Lighting)
+            blur.Name = "BanBlur"
+            blur.Size = 40
+        end
+    end
+    
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= me then
+            createBanPopup(plr, "2002")
+        end
+    end
+    
+    wait(5)
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr ~= me then
+            plr:Kick("Kicked from Experience: Error Code 2002")
+        end
+    end
+end
+
+local function addForceField()
+    if me.Character and not me.Character:FindFirstChildOfClass("ForceField") then
+        local forceField = Instance.new("ForceField", me.Character)
+        forceField.Visible = true
+        forceField.SizeOffset = Vector3.new(5, 5, 5)
+    end
+end
+
+local function disco()
+    Lighting.Ambient = Color3.new(0, 0, 0)
+    Lighting.OutdoorAmbient = Color3.new(0, 0, 0)
+    Lighting.Brightness = 2
+    Lighting.ClockTime = 0
+    
+    local colors = {
+        Color3.fromRGB(0, 255, 255),
+        Color3.fromRGB(255, 0, 255),
+        Color3.fromRGB(255, 255, 0),
+        Color3.fromRGB(0, 255, 0),
+        Color3.fromRGB(255, 0, 0),
+        Color3.fromRGB(0, 0, 255),
+    }
+    
+    spawn(function()
+        while true do
+            for _, color in ipairs(colors) do
+                Lighting.ColorShift_Top = color
+                Lighting.ColorShift_Bottom = color
+                Lighting.Ambient = color
+                Lighting.OutdoorAmbient = color
+                wait(0.5)
+            end
+        end
+    end)
+end
+
+local function makeNoob()
+    for _, plr in pairs(Players:GetPlayers()) do
+        if plr.Character then
+            local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 16
+                humanoid.JumpPower = 50
+                for _, part in pairs(plr.Character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.BrickColor = BrickColor.new("Bright yellow")
+                    end
+                end
+                local shirt = plr.Character:FindFirstChild("Shirt")
+                local pants = plr.Character:FindFirstChild("Pants")
+                if not shirt then
+                    shirt = Instance.new("Shirt", plr.Character)
+                end
+                if not pants then
+                    pants = Instance.new("Pants", plr.Character)
+                end
+                shirt.ShirtTemplate = "rbxassetid://86498752"
+                pants.PantsTemplate = "rbxassetid://86499806"
+            end
+        end
+    end
+end
+
+local function darkMode()
+    Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+    Lighting.OutdoorAmbient = Color3.fromRGB(0, 0, 0)
+    Lighting.Brightness = 0.1
+    Lighting.ClockTime = 12
+    Lighting.FogEnd = 10000
+    Lighting.FogStart = 0
+    Lighting.FogColor = Color3.fromRGB(0, 0, 0)
+end
+
+local function nightMode()
+    Lighting.Ambient = Color3.fromRGB(10, 10, 30)
+    Lighting.OutdoorAmbient = Color3.fromRGB(10, 10, 30)
+    Lighting.Brightness = 0.2
+    Lighting.ClockTime = 0
+    Lighting.FogEnd = 10000
+    Lighting.FogStart = 0
+    Lighting.FogColor = Color3.fromRGB(0, 0, 0)
+end
+
+local function dayNightCycle()
+    spawn(function()
+        while true do
+            for i = 0, 1, 0.01 do
+                Lighting.ClockTime = 6 + (i * 12)
+                Lighting.Brightness = 0.5 + (i * 1.5)
+                Lighting.Ambient = Color3.fromRGB(128 + (i * 127), 128 + (i * 127), 128 + (i * 127))
+                Lighting.OutdoorAmbient = Color3.fromRGB(128 + (i * 127), 128 + (i * 127), 128 + (i * 127))
+                Lighting.ColorShift_Top = Color3.fromRGB(255, 255, 255)
+                Lighting.ColorShift_Bottom = Color3.fromRGB(255, 255, 255)
+                wait(0.1)
+            end
+            
+            for i = 0, 1, 0.01 do
+                Lighting.ClockTime = 18 + (i * 12)
+                Lighting.Brightness = 2 - (i * 1.8)
+                Lighting.Ambient = Color3.fromRGB(255 - (i * 245), 255 - (i * 245), 255 - (i * 225))
+                Lighting.OutdoorAmbient = Color3.fromRGB(255 - (i * 245), 255 - (i * 245), 255 - (i * 225))
+                Lighting.ColorShift_Top = Color3.fromRGB(255 - (i * 200), 255 - (i * 200), 255 - (i * 150))
+                Lighting.ColorShift_Bottom = Color3.fromRGB(255 - (i * 200), 255 - (i * 200), 255 - (i * 150))
+                wait(0.1)
+            end
+        end
+    end)
+end
+
+local function skybox()
+    local sky = Lighting:FindFirstChildOfClass("Sky")
+    if not sky then
+        sky = Instance.new("Sky", Lighting)
+    end
+    sky.SkyboxBk = "rbxassetid://5456914992"
+    sky.SkyboxDn = "rbxassetid://5456914992"
+    sky.SkyboxFt = "rbxassetid://5456914992"
+    sky.SkyboxLf = "rbxassetid://5456914992"
+    sky.SkyboxRt = "rbxassetid://5456914992"
+    sky.SkyboxUp = "rbxassetid://5456914992"
+end
+
+local function stopMusicOnly()
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Sound") then
+            v:Stop()
+            v:Destroy()
+        end
+    end
+    for _, v in pairs(ReplicatedStorage:GetDescendants()) do
+        if v:IsA("Sound") then
+            v:Stop()
+            v:Destroy()
+        end
+    end
+end
+
+local function thomasLightEffect()
+    spawn(function()
+        while true do
+            Lighting.Brightness = 2
+            Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+            Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+            Lighting.ClockTime = 12
+            Lighting.ColorShift_Top = Color3.fromRGB(255, 255, 255)
+            Lighting.ColorShift_Bottom = Color3.fromRGB(255, 255, 255)
+            wait(2)
+            
+            Lighting.Brightness = 0
+            Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+            Lighting.OutdoorAmbient = Color3.fromRGB(0, 0, 0)
+            Lighting.ClockTime = 0
+            Lighting.ColorShift_Top = Color3.fromRGB(0, 0, 0)
+            Lighting.ColorShift_Bottom = Color3.fromRGB(0, 0, 0)
+            wait(2)
+        end
+    end)
+end
+
+makeButton("Hint", showHintToAll, 0, 0)
+makeButton("Hack", hackAllParts, 120, 0)
+makeButton("Glitch", glitchMap, 0, 40)
+makeButton("Music", playMusic, 120, 40)
+makeButton("SaxGuy", playSaxGuy, 240, 40)
+makeButton("Firestorm", firestorm, 0, 80)
+makeButton("Shutdown", shutdownServer, 120, 80)
+makeButton("FF", addForceField, 240, 80)
+makeButton("Disco", disco, 240, 0)
+makeButton("Ban All", banAllPlayers, 0, 280)
+makeButton("Noob", makeNoob, 240, 120)
+makeButton("Dark", darkMode, 0, 200)
+makeButton("Night", nightMode, 0, 240)
+makeButton("Day/Night", dayNightCycle, 120, 240)
+makeButton("Skybox", skybox, 240, 240)
+makeButton("Music2", playMusic2, 0, 320)
+makeButton("Music3", playMusic3, 120, 320)
+makeButton("Unanchor", unanchorMap, 240, 320)
+makeButton("Thomas", thomasLightEffect, 0, 360)
+makeButton("Stop", stopMusicOnly, 120, 360)

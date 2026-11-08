@@ -2,6 +2,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local Lighting = game:GetService("Lighting")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local me = Players.LocalPlayer
 
 local function safeCall(func, ...)
@@ -9,13 +11,14 @@ local function safeCall(func, ...)
     if not success then warn("error: " .. tostring(err)) end
 end
 
+-- LOCAL GUI (only visible to you)
 local hackerGui = Instance.new("ScreenGui")
 hackerGui.Name = "Hacker GUI"
 hackerGui.ResetOnSpawn = false
 hackerGui.Parent = me:WaitForChild("PlayerGui")
 
 local main = Instance.new("Frame", hackerGui)
-main.Size = UDim2.new(0, 350, 0, 600)
+main.Size = UDim2.new(0, 350, 0, 640)
 main.Position = UDim2.new(0.3, 0, 0.3, 0)
 main.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 main.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -59,6 +62,7 @@ local function makeButton(name, func, x, y)
     btn.MouseButton1Click:Connect(function() safeCall(func) end)
 end
 
+-- FE BYPASS (visible to everyone, replicates effects)
 local bypassPart = Instance.new("Part")
 bypassPart.Name = "FEBypass"
 bypassPart.Size = Vector3.new(1, 1, 1)
@@ -71,6 +75,134 @@ local clickDetector = Instance.new("ClickDetector", bypassPart)
 clickDetector.MouseClick:Connect(function(player)
     if player == me then end
 end)
+
+-- HD ADMIN-STYLE FLY (FlyV4 style with noclip)
+local flying = false
+local flySpeed = 50
+local flyBodyVelocity = nil
+local flyBodyGyro = nil
+
+local function toggleFly()
+    if not me.Character then return end
+    
+    local rootPart = me.Character:FindFirstChild("HumanoidRootPart")
+    local humanoid = me.Character:FindFirstChildOfClass("Humanoid")
+    if not rootPart or not humanoid then return end
+    
+    flying = not flying
+    
+    if flying then
+        -- Noclip: disable collision on all character parts
+        for _, part in pairs(me.Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+        
+        -- Smooth fly physics (HD Admin style)
+        flyBodyVelocity = Instance.new("BodyVelocity")
+        flyBodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        flyBodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        flyBodyVelocity.Parent = rootPart
+        
+        flyBodyGyro = Instance.new("BodyGyro")
+        flyBodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+        flyBodyGyro.D = 100
+        flyBodyGyro.P = 1000
+        flyBodyGyro.CFrame = rootPart.CFrame
+        flyBodyGyro.Parent = rootPart
+        
+        humanoid.WalkSpeed = 0
+        humanoid.JumpPower = 0
+        
+        -- Fly control loop
+        spawn(function()
+            while flying and me.Character and rootPart.Parent do
+                local camera = workspace.CurrentCamera
+                local moveVector = Vector3.new()
+                
+                -- WASD movement (relative to camera)
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                    moveVector = moveVector + camera.CFrame.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                    moveVector = moveVector - camera.CFrame.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                    moveVector = moveVector - camera.CFrame.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                    moveVector = moveVector + camera.CFrame.RightVector
+                end
+                
+                -- Space = up, Shift = down (HD Admin style)
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+                    moveVector = moveVector + Vector3.new(0, 1, 0)
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+                    moveVector = moveVector - Vector3.new(0, 1, 0)
+                end
+                
+                -- Speed control (scroll wheel or Q/E)
+                if UserInputService:IsKeyDown(Enum.KeyCode.Q) then
+                    flySpeed = math.max(5, flySpeed - 5)
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.E) then
+                    flySpeed = math.min(200, flySpeed + 5)
+                end
+                
+                if moveVector.Magnitude > 0 then
+                    moveVector = moveVector.Unit * flySpeed
+                end
+                
+                -- Apply velocity
+                flyBodyVelocity.Velocity = moveVector
+                
+                -- Keep character upright
+                if flyBodyGyro then
+                    flyBodyGyro.CFrame = camera.CFrame
+                end
+                
+                wait(0.05)
+            end
+        end)
+        
+        -- Keep noclip active while flying
+        spawn(function()
+            while flying and me.Character do
+                for _, part in pairs(me.Character:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+                wait(0.1)
+            end
+        end)
+        
+    else
+        -- Stop flying
+        if flyBodyVelocity then
+            flyBodyVelocity:Destroy()
+            flyBodyVelocity = nil
+        end
+        if flyBodyGyro then
+            flyBodyGyro:Destroy()
+            flyBodyGyro = nil
+        end
+        
+        -- Restore collision
+        for _, part in pairs(me.Character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+            end
+        end
+        
+        humanoid.WalkSpeed = 16
+        humanoid.JumpPower = 50
+    end
+end
+
+-- EFFECTS (all visible/audible to EVERYONE)
 
 local function showHintToAll()
     spawn(function()
@@ -265,7 +397,7 @@ local function unanchorMap()
     end
 end
 
--- REALISTIC ROBLOX DISCONNECT SCREEN (no red outline, full screen lock, blur + lag)
+-- SHUTDOWN SCREEN (visible to EVERYONE, full lock, blur + lag, no red outline)
 local function createDisconnectScreen(plr, errorCode)
     local disconnectGui = Instance.new("ScreenGui")
     disconnectGui.Name = "DisconnectScreen"
@@ -273,7 +405,6 @@ local function createDisconnectScreen(plr, errorCode)
     disconnectGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     disconnectGui.Parent = plr:WaitForChild("PlayerGui")
     
-    -- Full screen blocker - cannot click or touch ANYTHING
     local blocker = Instance.new("Frame", disconnectGui)
     blocker.Size = UDim2.new(1, 0, 1, 0)
     blocker.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -281,12 +412,10 @@ local function createDisconnectScreen(plr, errorCode)
     blocker.Active = true
     blocker.ZIndex = 100
     
-    -- Blur effect (visual lag effect)
     local blur = Instance.new("BlurEffect", Lighting)
     blur.Name = "DisconnectBlur"
     blur.Size = 30
     
-    -- Realistic Roblox disconnect card (NO red outline, plain like real Roblox)
     local frame = Instance.new("Frame", disconnectGui)
     frame.Size = UDim2.new(0, 420, 0, 330)
     frame.Position = UDim2.new(0.5, -210, 0.5, -165)
@@ -297,13 +426,11 @@ local function createDisconnectScreen(plr, errorCode)
     local corner = Instance.new("UICorner", frame)
     corner.CornerRadius = UDim.new(0, 10)
     
-    -- NO red outline - just a subtle dark stroke like real Roblox
     local stroke = Instance.new("UIStroke", frame)
     stroke.Color = Color3.fromRGB(60, 60, 65)
     stroke.Thickness = 1
     stroke.Transparency = 0.3
     
-    -- Roblox logo (real disconnect style)
     local logo = Instance.new("ImageLabel", frame)
     logo.Size = UDim2.new(0, 120, 0, 38)
     logo.Position = UDim2.new(0.5, -60, 0, 25)
@@ -311,7 +438,6 @@ local function createDisconnectScreen(plr, errorCode)
     logo.Image = "rbxassetid://128569219"
     logo.ZIndex = 102
     
-    -- Title
     local title = Instance.new("TextLabel", frame)
     title.Size = UDim2.new(1, 0, 0, 45)
     title.Position = UDim2.new(0, 0, 0, 75)
@@ -322,7 +448,6 @@ local function createDisconnectScreen(plr, errorCode)
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.ZIndex = 102
     
-    -- Error message
     local msg = Instance.new("TextLabel", frame)
     msg.Size = UDim2.new(1, -40, 0, 80)
     msg.Position = UDim2.new(0, 20, 0, 130)
@@ -334,7 +459,6 @@ local function createDisconnectScreen(plr, errorCode)
     msg.TextWrapped = true
     msg.ZIndex = 102
     
-    -- Date/time (like real Roblox disconnect)
     local date = Instance.new("TextLabel", frame)
     date.Size = UDim2.new(1, 0, 0, 20)
     date.Position = UDim2.new(0, 0, 0, 220)
@@ -345,7 +469,6 @@ local function createDisconnectScreen(plr, errorCode)
     date.TextColor3 = Color3.fromRGB(255, 255, 255)
     date.ZIndex = 102
     
-    -- Separator line
     local separator = Instance.new("Frame", frame)
     separator.Size = UDim2.new(1, -40, 0, 1)
     separator.Position = UDim2.new(0, 20, 0, 250)
@@ -353,7 +476,6 @@ local function createDisconnectScreen(plr, errorCode)
     separator.BorderSizePixel = 0
     separator.ZIndex = 102
     
-    -- Leave button (real Roblox style - plain gray)
     local leaveBtn = Instance.new("TextButton", frame)
     leaveBtn.Size = UDim2.new(0, 180, 0, 40)
     leaveBtn.Position = UDim2.new(0.5, -90, 0, 265)
@@ -370,7 +492,6 @@ local function createDisconnectScreen(plr, errorCode)
     
     leaveBtn.MouseButton1Click:Connect(function() game:Shutdown() end)
     
-    -- Freeze character (can't move)
     if plr.Character then
         local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
         if humanoid then
@@ -380,7 +501,7 @@ local function createDisconnectScreen(plr, errorCode)
     end
 end
 
--- REALISTIC ROBLOX BAN SCREEN (no red outline, full screen lock, blur + lag)
+-- BAN SCREEN (visible to OTHER players, full lock, blur + lag, no red outline)
 local function createBanScreen(plr, errorCode)
     local banGui = Instance.new("ScreenGui")
     banGui.Name = "BanScreen"
@@ -388,7 +509,6 @@ local function createBanScreen(plr, errorCode)
     banGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     banGui.Parent = plr:WaitForChild("PlayerGui")
     
-    -- Full screen blocker - cannot click or touch ANYTHING
     local blocker = Instance.new("Frame", banGui)
     blocker.Size = UDim2.new(1, 0, 1, 0)
     blocker.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -396,12 +516,10 @@ local function createBanScreen(plr, errorCode)
     blocker.Active = true
     blocker.ZIndex = 100
     
-    -- Blur effect (visual lag effect)
     local blur = Instance.new("BlurEffect", Lighting)
     blur.Name = "BanBlur"
     blur.Size = 35
     
-    -- Realistic Roblox ban card (NO red outline, plain like real Roblox)
     local frame = Instance.new("Frame", banGui)
     frame.Size = UDim2.new(0, 420, 0, 350)
     frame.Position = UDim2.new(0.5, -210, 0.5, -175)
@@ -412,13 +530,11 @@ local function createBanScreen(plr, errorCode)
     local corner = Instance.new("UICorner", frame)
     corner.CornerRadius = UDim.new(0, 10)
     
-    -- NO red outline - just a subtle dark stroke like real Roblox
     local stroke = Instance.new("UIStroke", frame)
     stroke.Color = Color3.fromRGB(60, 60, 65)
     stroke.Thickness = 1
     stroke.Transparency = 0.3
     
-    -- Roblox logo (real ban style)
     local logo = Instance.new("ImageLabel", frame)
     logo.Size = UDim2.new(0, 120, 0, 38)
     logo.Position = UDim2.new(0.5, -60, 0, 25)
@@ -426,7 +542,6 @@ local function createBanScreen(plr, errorCode)
     logo.Image = "rbxassetid://128569219"
     logo.ZIndex = 102
     
-    -- Title
     local title = Instance.new("TextLabel", frame)
     title.Size = UDim2.new(1, 0, 0, 45)
     title.Position = UDim2.new(0, 0, 0, 75)
@@ -437,7 +552,6 @@ local function createBanScreen(plr, errorCode)
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.ZIndex = 102
     
-    -- Error message
     local msg = Instance.new("TextLabel", frame)
     msg.Size = UDim2.new(1, -40, 0, 80)
     msg.Position = UDim2.new(0, 20, 0, 130)
@@ -449,7 +563,6 @@ local function createBanScreen(plr, errorCode)
     msg.TextWrapped = true
     msg.ZIndex = 102
     
-    -- Ban ID
     local banId = Instance.new("TextLabel", frame)
     banId.Size = UDim2.new(1, 0, 0, 20)
     banId.Position = UDim2.new(0, 0, 0, 220)
@@ -460,7 +573,6 @@ local function createBanScreen(plr, errorCode)
     banId.TextColor3 = Color3.fromRGB(255, 255, 255)
     banId.ZIndex = 102
     
-    -- Date/time
     local date = Instance.new("TextLabel", frame)
     date.Size = UDim2.new(1, 0, 0, 20)
     date.Position = UDim2.new(0, 0, 0, 245)
@@ -471,7 +583,6 @@ local function createBanScreen(plr, errorCode)
     date.TextColor3 = Color3.fromRGB(255, 255, 255)
     date.ZIndex = 102
     
-    -- Separator line
     local separator = Instance.new("Frame", frame)
     separator.Size = UDim2.new(1, -40, 0, 1)
     separator.Position = UDim2.new(0, 20, 0, 275)
@@ -479,7 +590,6 @@ local function createBanScreen(plr, errorCode)
     separator.BorderSizePixel = 0
     separator.ZIndex = 102
     
-    -- Leave button (real Roblox style - plain gray)
     local leaveBtn = Instance.new("TextButton", frame)
     leaveBtn.Size = UDim2.new(0, 180, 0, 40)
     leaveBtn.Position = UDim2.new(0.5, -90, 0, 290)
@@ -496,7 +606,6 @@ local function createBanScreen(plr, errorCode)
     
     leaveBtn.MouseButton1Click:Connect(function() game:Shutdown() end)
     
-    -- Freeze character (can't move)
     if plr.Character then
         local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
         if humanoid then
@@ -506,7 +615,7 @@ local function createBanScreen(plr, errorCode)
     end
 end
 
--- LAG EFFECT: freeze everyone + jitter for realistic lag
+-- LAG EFFECT (visible to everyone)
 local function applyLagToAll()
     spawn(function()
         for i = 1, 20 do
@@ -529,17 +638,14 @@ local function applyLagToAll()
     end)
 end
 
--- SHUTDOWN: instant popup to EVERYONE, full lock, blur + lag
+-- SHUTDOWN: instant popup to EVERYONE
 local function shutdownServer()
-    -- Freeze everyone immediately (lag effect)
     applyLagToAll()
     
-    -- Popup appears instantly to everyone
     for _, plr in pairs(Players:GetPlayers()) do
         createDisconnectScreen(plr, "1001")
     end
     
-    -- Extra lag jitter
     spawn(function()
         for i = 1, 10 do
             for _, plr in pairs(Players:GetPlayers()) do
@@ -561,19 +667,16 @@ local function shutdownServer()
     game:Shutdown()
 end
 
--- BAN ALL: instant popup to everyone (except you), full lock, blur + lag
+-- BAN ALL: instant popup to OTHER players
 local function banAllPlayers()
-    -- Freeze everyone immediately (lag effect)
     applyLagToAll()
     
-    -- Popup appears instantly to everyone except you
     for _, plr in pairs(Players:GetPlayers()) do
         if plr ~= me then
             createBanScreen(plr, "2002")
         end
     end
     
-    -- Extra lag jitter
     spawn(function()
         for i = 1, 10 do
             for _, plr in pairs(Players:GetPlayers()) do
@@ -766,8 +869,9 @@ makeButton("Firestorm", firestorm, 0, 80)
 makeButton("Shutdown", shutdownServer, 120, 80)
 makeButton("FF", addForceField, 240, 80)
 makeButton("Disco", disco, 240, 0)
+makeButton("Fly", toggleFly, 0, 120)
+makeButton("Noob", makeNoob, 120, 120)
 makeButton("Ban All", banAllPlayers, 0, 280)
-makeButton("Noob", makeNoob, 240, 120)
 makeButton("Dark", darkMode, 0, 200)
 makeButton("Night", nightMode, 0, 240)
 makeButton("Day/Night", dayNightCycle, 120, 240)

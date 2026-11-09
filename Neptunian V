@@ -652,53 +652,6 @@ t.MakeWedge = function(x, y, z, defaultmaterial)
 return game:GetService("Terrain"):AutoWedgeCell(x,y,z)
 end
  
-t.SelectTerrainRegion = function(regionToSelect, color, selectEmptyCells, selectionParent)
-local terrain = game:GetService("Workspace"):FindFirstChild("Terrain")
-if not terrain then return end
- 
-assert(regionToSelect)
-assert(color)
- 
-if not type(regionToSelect) == "Region3" then
-error("regionToSelect (first arg), should be of type Region3, but is type",type(regionToSelect))
-end
-if not type(color) == "BrickColor" then
-error("color (second arg), should be of type BrickColor, but is type",type(color))
-end
- 
--- frequently used terrain calls (speeds up call, no lookup necessary)
-local GetCell = terrain.GetCell
-local WorldToCellPreferSolid = terrain.WorldToCellPreferSolid
-local CellCenterToWorld = terrain.CellCenterToWorld
-local emptyMaterial = Enum.CellMaterial.Empty
- 
--- container for all adornments, passed back to user
-local selectionContainer = Instance.new("Model")
-selectionContainer.Name = "SelectionContainer"
-selectionContainer.Archivable = false
-if selectionParent then
-selectionContainer.Parent = selectionParent
-else
-selectionContainer.Parent = game:GetService("Workspace")
-end
- 
-local updateSelection = nil -- function we return to allow user to update selection
-local currentKeepAliveTag = nil -- a tag that determines whether adorns should be destroyed
-local aliveCounter = 0 -- helper for currentKeepAliveTag
-local lastRegion = nil -- used to stop updates that do nothing
-local adornments = {} -- contains all adornments
-local reusableAdorns = {}
-
-
--- helper function to update tag
-function incrementAliveCounter()
-aliveCounter = aliveCounter + 1
-if aliveCounter > 1000000 then
-aliveCounter = 0
-end
-return aliveCounter
-end
-
 -----------------------------Terrain Utilities End-----------------------------
  
  

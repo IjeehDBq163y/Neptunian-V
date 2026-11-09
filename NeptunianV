@@ -112,7 +112,7 @@ task.wait(1)
 
 local args = {
 	"cmd",
-	"-gh 112934510372081 "
+	"-gh 112934510372081"
 }
 game:GetService("ReplicatedStorage"):WaitForChild("01_server"):FireServer(unpack(args))
 wait(2)

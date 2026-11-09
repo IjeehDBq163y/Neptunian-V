@@ -1,6 +1,6 @@
 local UserConfig = {
     ["Corrupted IjeehDBq"] = {
-        Text = "NEPTUNIAN V",
+        Text = "Neptunian V",
         TextColor = Color3.fromRGB(255, 215, 0),
         HighlightColor = Color3.fromRGB(255, 215, 0),
     },
@@ -650,6 +650,210 @@ end
 --returns true if made a wedge, false if the cell remains a block
 t.MakeWedge = function(x, y, z, defaultmaterial)
 return game:GetService("Terrain"):AutoWedgeCell(x,y,z)
+end
+ 
+t.SelectTerrainRegion = function(regionToSelect, color, selectEmptyCells, selectionParent)
+local terrain = game:GetService("Workspace"):FindFirstChild("Terrain")
+if not terrain then return end
+ 
+assert(regionToSelect)
+assert(color)
+ 
+if not type(regionToSelect) == "Region3" then
+error("regionToSelect (first arg), should be of type Region3, but is type",type(regionToSelect))
+end
+if not type(color) == "BrickColor" then
+error("color (second arg), should be of type BrickColor, but is type",type(color))
+end
+ 
+-- frequently used terrain calls (speeds up call, no lookup necessary)
+local GetCell = terrain.GetCell
+local WorldToCellPreferSolid = terrain.WorldToCellPreferSolid
+local CellCenterToWorld = terrain.CellCenterToWorld
+local emptyMaterial = Enum.CellMaterial.Empty
+ 
+-- container for all adornments, passed back to user
+local selectionContainer = Instance.new("Model")
+selectionContainer.Name = "SelectionContainer"
+selectionContainer.Archivable = false
+if selectionParent then
+selectionContainer.Parent = selectionParent
+else
+selectionContainer.Parent = game:GetService("Workspace")
+end
+ 
+local updateSelection = nil -- function we return to allow user to update selection
+local currentKeepAliveTag = nil -- a tag that determines whether adorns should be destroyed
+local aliveCounter = 0 -- helper for currentKeepAliveTag
+local lastRegion = nil -- used to stop updates that do nothing
+local adornments = {} -- contains all adornments
+local reusableAdorns = {}
+ 
+local selectionPart = Instance.new("Part")
+selectionPart.Name = "SelectionPart"
+selectionPart.Transparency = 1
+selectionPart.Anchored = true
+selectionPart.Locked = true
+selectionPart.CanCollide = false
+selectionPart.Size = Vector3.new(4.2,4.2,4.2)
+ 
+local selectionBox = Instance.new("SelectionBox")
+ 
+-- srs translation from region3 to region3int16
+local function Region3ToRegion3int16(region3)
+local theLowVec = region3.CFrame.p - (region3.Size/2) + Vector3.new(2,2,2)
+local lowCell = WorldToCellPreferSolid(terrain,theLowVec)
+ 
+local theHighVec = region3.CFrame.p + (region3.Size/2) - Vector3.new(2,2,2)
+local highCell = WorldToCellPreferSolid(terrain, theHighVec)
+ 
+local highIntVec = Vector3int16.new(highCell.x,highCell.y,highCell.z)
+local lowIntVec = Vector3int16.new(lowCell.x,lowCell.y,lowCell.z)
+ 
+return Region3int16.new(lowIntVec,highIntVec)
+end
+ 
+-- helper function that creates the basis for a selection box
+function createAdornment(theColor)
+local selectionPartClone = nil
+local selectionBoxClone = nil
+ 
+if #reusableAdorns > 0 then
+selectionPartClone = reusableAdorns[1]["part"]
+selectionBoxClone = reusableAdorns[1]["box"]
+table.remove(reusableAdorns,1)
+ 
+selectionBoxClone.Visible = false
+else
+selectionPartClone = selectionPart:Clone()
+selectionPartClone.Archivable = false
+ 
+selectionBoxClone = selectionBox:Clone()
+selectionBoxClone.Archivable = false
+ 
+selectionBoxClone.Adornee = selectionPartClone
+selectionBoxClone.Parent = selectionContainer
+ 
+selectionBoxClone.Adornee = selectionPartClone
+ 
+selectionBoxClone.Parent = selectionContainer
+end
+ 
+if theColor then
+selectionBoxClone.Color = theColor
+end
+ 
+return selectionPartClone, selectionBoxClone
+end
+ 
+-- iterates through all current adornments and deletes any that don't have latest tag
+function cleanUpAdornments()
+for cellPos, adornTable in pairs(adornments) do
+ 
+if adornTable.KeepAlive ~= currentKeepAliveTag then -- old news, we should get rid of this
+adornTable.SelectionBox.Visible = false
+table.insert(reusableAdorns,{part = adornTable.SelectionPart, box = adornTable.SelectionBox})
+adornments[cellPos] = nil
+end
+end
+end
+ 
+-- helper function to update tag
+function incrementAliveCounter()
+aliveCounter = aliveCounter + 1
+if aliveCounter > 1000000 then
+aliveCounter = 0
+end
+return aliveCounter
+end
+ 
+-- finds full cells in region and adorns each cell with a box, with the argument color
+function adornFullCellsInRegion(region, color)
+local regionBegin = region.CFrame.p - (region.Size/2) + Vector3.new(2,2,2)
+local regionEnd = region.CFrame.p + (region.Size/2) - Vector3.new(2,2,2)
+ 
+local cellPosBegin = WorldToCellPreferSolid(terrain, regionBegin)
+local cellPosEnd = WorldToCellPreferSolid(terrain, regionEnd)
+ 
+currentKeepAliveTag = incrementAliveCounter()
+for y = cellPosBegin.y, cellPosEnd.y do
+for z = cellPosBegin.z, cellPosEnd.z do
+for x = cellPosBegin.x, cellPosEnd.x do
+local cellMaterial = GetCell(terrain, x, y, z)
+ 
+if cellMaterial ~= emptyMaterial then
+local cframePos = CellCenterToWorld(terrain, x, y, z)
+local cellPos = Vector3int16.new(x,y,z)
+ 
+local updated = false
+for cellPosAdorn, adornTable in pairs(adornments) do
+if cellPosAdorn == cellPos then
+adornTable.KeepAlive = currentKeepAliveTag
+if color then
+adornTable.SelectionBox.Color = color
+end
+updated = true
+break
+end
+end
+ 
+if not updated then
+local selectionPart, selectionBox = createAdornment(color)
+selectionPart.Size = Vector3.new(4,4,4)
+selectionPart.CFrame = CFrame.new(cframePos)
+local adornTable = {SelectionPart = selectionPart, SelectionBox = selectionBox, KeepAlive = currentKeepAliveTag}
+adornments[cellPos] = adornTable
+end
+end
+end
+end
+end
+cleanUpAdornments()
+end
+ 
+ 
+------------------------------------- setup code ------------------------------
+lastRegion = regionToSelect
+ 
+if selectEmptyCells then -- use one big selection to represent the area selected
+local selectionPart, selectionBox = createAdornment(color)
+ 
+selectionPart.Size = regionToSelect.Size
+selectionPart.CFrame = regionToSelect.CFrame
+ 
+adornments.SelectionPart = selectionPart
+adornments.SelectionBox = selectionBox
+ 
+updateSelection =
+function (newRegion, color)
+if newRegion and newRegion ~= lastRegion then
+lastRegion = newRegion
+selectionPart.Size = newRegion.Size
+selectionPart.CFrame = newRegion.CFrame
+end
+if color then
+selectionBox.Color = color
+end
+end
+else -- use individual cell adorns to represent the area selected
+adornFullCellsInRegion(regionToSelect, color)
+updateSelection =
+function (newRegion, color)
+if newRegion and newRegion ~= lastRegion then
+lastRegion = newRegion
+adornFullCellsInRegion(newRegion, color)
+end
+end
+ 
+end
+ 
+local destroyFunc = function()
+updateSelection = nil
+if selectionContainer then selectionContainer:Destroy() end
+adornments = nil
+end
+ 
+return updateSelection, destroyFunc
 end
  
 -----------------------------Terrain Utilities End-----------------------------
@@ -6224,6 +6428,10 @@ task.spawn(function()
         end
     end)
 end)
+
+-- hat sync2 --
+local hatOffset = CFrame.new(0, -8.5, 0.3) * CFrame.Angles(math.rad(180), math.rad(-5), math.rad(0))
+local targetMeshId = "2649319534"
 
 task.spawn(function()
     local _player = game:GetService("Players").LocalPlayer

@@ -1,6 +1,6 @@
 local UserConfig = {
-    ["NEPTUNIAN V"] = {
-        Text = "NEPTUNIAN V",
+    ["Corrupted100110"] = {
+        Text = "Neptunian V",
         TextColor = Color3.fromRGB(255, 215, 0),
         HighlightColor = Color3.fromRGB(255, 215, 0),
     },
@@ -112,7 +112,7 @@ task.wait(1)
 
 local args = {
 	"cmd",
-	"-gh 112934510372081"
+	"-gh 112934510372081 2649326901"
 }
 game:GetService("ReplicatedStorage"):WaitForChild("01_server"):FireServer(unpack(args))
 wait(2)
@@ -6428,6 +6428,7 @@ task.spawn(function()
         end
     end)
 end)
+
 
 task.spawn(function()
     local _player = game:GetService("Players").LocalPlayer

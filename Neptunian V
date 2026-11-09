@@ -1,6 +1,6 @@
 local UserConfig = {
     ["Corrupted IjeehDBq"] = {
-        Text = "NEPTUNIAN V",
+        Text = "Dark God sword",
         TextColor = Color3.fromRGB(255, 215, 0),
         HighlightColor = Color3.fromRGB(255, 215, 0),
     },
@@ -6596,7 +6596,7 @@ ned.TextColor3 = BrickColor.new("Royal purple").Color
 ned.TextStrokeColor3 = BrickColor.new("Cyan").Color
 ned.TextScaled = true
 ned.TextStrokeTransparency = 0
-ned.Text = "NEPTUNIAN V"
+ned.Text = "DARK LORD SWORD"
 ned.TextSize = 24
 ned.Rotation = 1
 --ned.TextXAlignment = "Right"

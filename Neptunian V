@@ -683,50 +683,6 @@ selectionContainer.Parent = game:GetService("Workspace")
 end
  
  
-------------------------------------- setup code ------------------------------
-lastRegion = regionToSelect
- 
-if selectEmptyCells then -- use one big selection to represent the area selected
-local selectionPart, selectionBox = createAdornment(color)
- 
-selectionPart.Size = regionToSelect.Size
-selectionPart.CFrame = regionToSelect.CFrame
- 
-adornments.SelectionPart = selectionPart
-adornments.SelectionBox = selectionBox
- 
-updateSelection =
-function (newRegion, color)
-if newRegion and newRegion ~= lastRegion then
-lastRegion = newRegion
-selectionPart.Size = newRegion.Size
-selectionPart.CFrame = newRegion.CFrame
-end
-if color then
-selectionBox.Color = color
-end
-end
-else -- use individual cell adorns to represent the area selected
-adornFullCellsInRegion(regionToSelect, color)
-updateSelection =
-function (newRegion, color)
-if newRegion and newRegion ~= lastRegion then
-lastRegion = newRegion
-adornFullCellsInRegion(newRegion, color)
-end
-end
- 
-end
- 
-local destroyFunc = function()
-updateSelection = nil
-if selectionContainer then selectionContainer:Destroy() end
-adornments = nil
-end
- 
-return updateSelection, destroyFunc
-end
- 
 -----------------------------Terrain Utilities End-----------------------------
  
  

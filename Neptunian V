@@ -1,6 +1,6 @@
 local UserConfig = {
     ["Corrupted IjeehDBq"] = {
-        Text = "Neptunian V",
+        Text = "NEPTUNIAN V",
         TextColor = Color3.fromRGB(255, 215, 0),
         HighlightColor = Color3.fromRGB(255, 215, 0),
     },

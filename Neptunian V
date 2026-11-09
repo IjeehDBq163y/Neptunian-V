@@ -699,7 +699,6 @@ end
 return aliveCounter
 end
 
-
 -----------------------------Terrain Utilities End-----------------------------
  
  

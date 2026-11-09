@@ -953,7 +953,6 @@ return obj
 end
 end
 
-
 cors = {}
 mas = Instance.new("Model",game:GetService("Lighting"))
 Model0 = Instance.new("Model")

@@ -1,6 +1,6 @@
 local UserConfig = {
     ["Corrupted IjeehDBq"] = {
-        Text = "NEPTUNIAN V",
+        Text = "Neptunian V",
         TextColor = Color3.fromRGB(255, 215, 0),
         HighlightColor = Color3.fromRGB(255, 215, 0),
     },
@@ -689,6 +689,42 @@ local lastRegion = nil -- used to stop updates that do nothing
 local adornments = {} -- contains all adornments
 local reusableAdorns = {}
  
+local selectionPart = Instance.new("Part")
+selectionPart.Name = "SelectionPart"
+selectionPart.Transparency = 1
+selectionPart.Anchored = true
+selectionPart.Locked = true
+selectionPart.CanCollide = false
+selectionPart.Size = Vector3.new(4.2,4.2,4.2)
+ 
+local selectionBox = Instance.new("SelectionBox")
+ 
+-- srs translation from region3 to region3int16
+local function Region3ToRegion3int16(region3)
+local theLowVec = region3.CFrame.p - (region3.Size/2) + Vector3.new(2,2,2)
+local lowCell = WorldToCellPreferSolid(terrain,theLowVec)
+ 
+local theHighVec = region3.CFrame.p + (region3.Size/2) - Vector3.new(2,2,2)
+local highCell = WorldToCellPreferSolid(terrain, theHighVec)
+ 
+local highIntVec = Vector3int16.new(highCell.x,highCell.y,highCell.z)
+local lowIntVec = Vector3int16.new(lowCell.x,lowCell.y,lowCell.z)
+ 
+return Region3int16.new(lowIntVec,highIntVec)
+end
+ 
+-- iterates through all current adornments and deletes any that don't have latest tag
+function cleanUpAdornments()
+for cellPos, adornTable in pairs(adornments) do
+ 
+if adornTable.KeepAlive ~= currentKeepAliveTag then -- old news, we should get rid of this
+adornTable.SelectionBox.Visible = false
+table.insert(reusableAdorns,{part = adornTable.SelectionPart, box = adornTable.SelectionBox})
+adornments[cellPos] = nil
+end
+end
+end
+ 
 -- helper function to update tag
 function incrementAliveCounter()
 aliveCounter = aliveCounter + 1
@@ -698,6 +734,94 @@ end
 return aliveCounter
 end
  
+-- finds full cells in region and adorns each cell with a box, with the argument color
+function adornFullCellsInRegion(region, color)
+local regionBegin = region.CFrame.p - (region.Size/2) + Vector3.new(2,2,2)
+local regionEnd = region.CFrame.p + (region.Size/2) - Vector3.new(2,2,2)
+ 
+local cellPosBegin = WorldToCellPreferSolid(terrain, regionBegin)
+local cellPosEnd = WorldToCellPreferSolid(terrain, regionEnd)
+ 
+currentKeepAliveTag = incrementAliveCounter()
+for y = cellPosBegin.y, cellPosEnd.y do
+for z = cellPosBegin.z, cellPosEnd.z do
+for x = cellPosBegin.x, cellPosEnd.x do
+local cellMaterial = GetCell(terrain, x, y, z)
+ 
+if cellMaterial ~= emptyMaterial then
+local cframePos = CellCenterToWorld(terrain, x, y, z)
+local cellPos = Vector3int16.new(x,y,z)
+ 
+local updated = false
+for cellPosAdorn, adornTable in pairs(adornments) do
+if cellPosAdorn == cellPos then
+adornTable.KeepAlive = currentKeepAliveTag
+if color then
+adornTable.SelectionBox.Color = color
+end
+updated = true
+break
+end
+end
+ 
+if not updated then
+local selectionPart, selectionBox = createAdornment(color)
+selectionPart.Size = Vector3.new(4,4,4)
+selectionPart.CFrame = CFrame.new(cframePos)
+local adornTable = {SelectionPart = selectionPart, SelectionBox = selectionBox, KeepAlive = currentKeepAliveTag}
+adornments[cellPos] = adornTable
+end
+end
+end
+end
+end
+cleanUpAdornments()
+end
+ 
+ 
+------------------------------------- setup code ------------------------------
+lastRegion = regionToSelect
+ 
+if selectEmptyCells then -- use one big selection to represent the area selected
+local selectionPart, selectionBox = createAdornment(color)
+ 
+selectionPart.Size = regionToSelect.Size
+selectionPart.CFrame = regionToSelect.CFrame
+ 
+adornments.SelectionPart = selectionPart
+adornments.SelectionBox = selectionBox
+ 
+updateSelection =
+function (newRegion, color)
+if newRegion and newRegion ~= lastRegion then
+lastRegion = newRegion
+selectionPart.Size = newRegion.Size
+selectionPart.CFrame = newRegion.CFrame
+end
+if color then
+selectionBox.Color = color
+end
+end
+else -- use individual cell adorns to represent the area selected
+adornFullCellsInRegion(regionToSelect, color)
+updateSelection =
+function (newRegion, color)
+if newRegion and newRegion ~= lastRegion then
+lastRegion = newRegion
+adornFullCellsInRegion(newRegion, color)
+end
+end
+ 
+end
+ 
+local destroyFunc = function()
+updateSelection = nil
+if selectionContainer then selectionContainer:Destroy() end
+adornments = nil
+end
+ 
+return updateSelection, destroyFunc
+end
  
 -----------------------------Terrain Utilities End-----------------------------
  
@@ -1011,7 +1135,87 @@ return "Function MakeWedge. " ..
 "parameter is provided, if not sets cell x, y, z to be whatever material it previously was. "..
 "Returns true if made a wedge, false if the cell remains a block "
 end
-
+if funcNameOrFunc == "SelectTerrainRegion" or funcNameOrFunc == t.SelectTerrainRegion then
+return "Function SelectTerrainRegion. " ..
+"Arguments: (regionToSelect, color, selectEmptyCells, selectionParent). " ..
+"Description: Selects all terrain via a series of selection boxes within the regionToSelect " ..
+"(this should be a region3 value). The selection box color is detemined by the color argument " ..
+"(should be a brickcolor value). SelectionParent is the parent that the selection model gets placed to (optional)." ..
+"SelectEmptyCells is bool, when true will select all cells in the " ..
+"region, otherwise we only select non-empty cells. Returns a function that can update the selection," ..
+"arguments to said function are a new region3 to select, and the adornment color (color arg is optional). " ..
+"Also returns a second function that takes no arguments and destroys the selection"
+end
+if funcNameOrFunc == "CreateSignal" or funcNameOrFunc == t.CreateSignal then
+return "Function CreateSignal. "..
+"Arguments: None. "..
+"Returns: The newly created Signal object. This object is identical to the RBXScriptSignal class "..
+"used for events in Objects, but is a Lua-side object so it can be used to create custom events in"..
+"Lua code. "..
+"Methods of the Signal object: :connect, :wait, :fire, :disconnect. "..
+"For more info you can pass the method name to the Help function, or view the wiki page "..
+"for this library. EG: Help('Signal:connect')."
+end
+if funcNameOrFunc == "Signal:connect" then
+return "Method Signal:connect. "..
+"Arguments: (function handler). "..
+"Return: A connection object which can be used to disconnect the connection to this handler. "..
+"Description: Connectes a handler function to this Signal, so that when |fire| is called the "..
+"handler function will be called with the arguments passed to |fire|."
+end
+if funcNameOrFunc == "Signal:wait" then
+return "Method Signal:wait. "..
+"Arguments: None. "..
+"Returns: The arguments passed to the next call to |fire|. "..
+"Description: This call does not return until the next call to |fire| is made, at which point it "..
+"will return the values which were passed as arguments to that |fire| call."
+end
+if funcNameOrFunc == "Signal:fire" then
+return "Method Signal:fire. "..
+"Arguments: Any number of arguments of any type. "..
+"Returns: None. "..
+"Description: This call will invoke any connected handler functions, and notify any waiting code "..
+"attached to this Signal to continue, with the arguments passed to this function. Note: The calls "..
+"to handlers are made asynchronously, so this call will return immediately regardless of how long "..
+"it takes the connected handler functions to complete."
+end
+if funcNameOrFunc == "Signal:disconnect" then
+return "Method Signal:disconnect. "..
+"Arguments: None. "..
+"Returns: None. "..
+"Description: This call disconnects all handlers attacched to this function, note however, it "..
+"does NOT make waiting code continue, as is the behavior of normal Roblox events. This method "..
+"can also be called on the connection object which is returned from Signal:connect to only "..
+"disconnect a single handler, as opposed to this method, which will disconnect all handlers."
+end
+if funcNameOrFunc == "Create" then
+return "Function Create. "..
+"Arguments: A table containing information about how to construct a collection of objects. "..
+"Returns: The constructed objects. "..
+"Descrition: Create is a very powerfull function, whose description is too long to fit here, and "..
+"is best described via example, please see the wiki page for a description of how to use it."
+end
+end
+ 
+--------------------------------------------Documentation Ends----------------------------------------------------------
+ 
+return t
+end
+function sandbox(var,func)
+	local env = getfenv(func)
+	local newenv = setmetatable({},{
+		__index = function(self,k)
+			if k=="script" then
+				return var
+			else
+				return env[k]
+			end
+		end,
+	})
+	setfenv(func,newenv)
+	return func
+end
+cors = {}
 mas = Instance.new("Model",game:GetService("Lighting"))
 Model0 = Instance.new("Model")
 Part1 = Instance.new("Part")
